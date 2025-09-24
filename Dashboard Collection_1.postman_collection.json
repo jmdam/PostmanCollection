@@ -1,0 +1,1362 @@
+{
+	"info": {
+		"_postman_id": "2cfb98fb-dfda-4c00-b325-ee38f6757c10",
+		"name": "Dashboard Collection Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36453405"
+	},
+	"item": [
+		{
+			"name": "AddEmployee_MinimalPayload",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const payload = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"const requiredFields = [\r",
+							"    \"firstName\",\r",
+							"    \"lastName\",\r",
+							"    \"username\"\r",
+							"];\r",
+							"\r",
+							"requiredFields.forEach(field => {\r",
+							"    if (!payload.hasOwnProperty(field)) {\r",
+							"        throw new Error(`Missing mandatory field: ${field}`);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeIdMinimal\", responseData.id); \r",
+							"\r",
+							"console.log(\"Saved employeeIdMinimal:\", pm.collectionVariables.get(\"employeeIdMinimal\"));\r",
+							"\r",
+							"pm.test('Response has the required fields', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'salary', 'gross', 'benefitsCost', 'net');\r",
+							"})\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"pm.test('Username is a non-empty string', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, 'Username should not be empty');\r",
+							"})\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"TestUser809\",\r\n  \"firstName\": \"{{rndNAme}}\",\r\n  \"lastName\": \"{{rndLastNAme}}\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetEmployeeById_Minimal",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'expiration', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Salary, gross, benefitsCost, and net must be non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.salary).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.gross).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.benefitsCost).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.net).to.be.a('number').and.to.be.at.least(0);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Expiration is in a valid ISO 8601 format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.expiration).to.match(",
+							"        /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$/,",
+							"        \"Expiration date format should be ISO 8601 (e.g., 2025-10-24T04:06:56Z or with offset)\"",
+							"    );",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});",
+							"",
+							"let responseData = pm.response.json();",
+							"pm.collectionVariables.set(\"fname\", responseData.firstName); ",
+							"pm.collectionVariables.set(\"lname\", responseData.lastName); ",
+							"console.log(\"Saved fname:\", pm.collectionVariables.get(\"fname\"));",
+							"console.log(\"Saved lname:\", pm.collectionVariables.get(\"lname\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"console.log(\"employeeIdMinimal:\", pm.collectionVariables.get(\"employeeIdMinimal\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdMinimal}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdMinimal}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateEmployeById_MinimalPayload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"All numeric fields are non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    const numericFields = ['dependants', 'salary', 'gross', 'benefitsCost', 'net'];",
+							"    ",
+							"    numericFields.forEach(field => {",
+							"        pm.expect(responseData[field]).to.be.a('number').and.to.be.at.least(0, `${field} should be a non-negative integer`);",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.have.property('username').that.is.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"firstName\": \"{{fname}}\",\r\n  \"lastName\": \"{{lnameMinimal}}\",\r\n  \"dependants\": \"5\",\r\n  \"id\": \"{{employeeIdMinimal}}\"\r\n  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Record deleted successfully: \" + pm.collectionVariables.get(\"employeeId\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdMinimal}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdMinimal}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddEmployee_FullPayload",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							"const payload = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"const requiredFields = [\r",
+							"    \"firstName\",\r",
+							"    \"lastName\",\r",
+							"    \"username\"\r",
+							"];\r",
+							"\r",
+							"requiredFields.forEach(field => {\r",
+							"    if (!payload.hasOwnProperty(field)) {\r",
+							"        throw new Error(`Missing mandatory field: ${field}`);\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeIdFull\", responseData.id); \r",
+							"\r",
+							"console.log(\"Saved employeeId:\", pm.collectionVariables.get(\"employeeIdFull\"));\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"pm.test('Username is a non-empty string', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, 'Username should not be empty');\r",
+							"})\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})\r",
+							"\r",
+							"pm.collectionVariables.set(\"fname\", responseData.firstName); \r",
+							"pm.collectionVariables.set(\"lname\", responseData.lastName); \r",
+							"console.log(\"Saved fname:\", pm.collectionVariables.get(\"fname\"));\r",
+							"console.log(\"Saved lname:\", pm.collectionVariables.get(\"lname\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"TestUser002\",\r\n  \"firstName\": \"{{rndNAme}}\",\r\n  \"lastName\": \"{{rndLastNAme}}\",\r\n  \"dependants\": 2,\r\n  \"expiration\": \"2025-12-31T23:59:59+00:00\",\r\n  \"salary\": 55000,\r\n  \"gross\": 60000,\r\n  \"benefitsCost\": 5000,\r\n  \"net\": 55000,\r\n  \"id\": \"e7220c23-f7d2-49e3-b9ca-7968b16a5dd5\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetEmployeeById_FullPayload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'expiration', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Salary, gross, benefitsCost, and net must be non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.salary).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.gross).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.benefitsCost).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.net).to.be.a('number').and.to.be.at.least(0);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Expiration is in a valid ISO 8601 format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.expiration).to.match(",
+							"        /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$/,",
+							"        \"Expiration date format should be ISO 8601 (e.g., 2025-10-24T04:06:56Z or with offset)\"",
+							"    );",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});",
+							"",
+							"let responseData = pm.response.json();",
+							"pm.collectionVariables.set(\"fname\", responseData.firstName); ",
+							"pm.collectionVariables.set(\"lname\", responseData.lastName); ",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdFull}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdFull}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateEmployeById_FullPayload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"All numeric fields are non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    const numericFields = ['dependants', 'salary', 'gross', 'benefitsCost', 'net'];",
+							"    ",
+							"    numericFields.forEach(field => {",
+							"        pm.expect(responseData[field]).to.be.a('number').and.to.be.at.least(0, `${field} should be a non-negative integer`);",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.have.property('username').that.is.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"packages": {},
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"firstName\": \"{{fname}}\",\r\n  \"lastName\": \"{{lname}}\",\r\n  \"dependants\": \"5\",\r\n  \"id\": \"{{employeeIdFull}}\"\r\n  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"    console.log(\"Record deleted successfully: \" + pm.collectionVariables.get(\"employeeId\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdFull}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdFull}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddEmployee_ZeroDependants",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const payload = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"const requiredFields = [\r",
+							"    \"firstName\",\r",
+							"    \"lastName\",\r",
+							"    \"username\"\r",
+							"];\r",
+							"\r",
+							"requiredFields.forEach(field => {\r",
+							"    if (!payload.hasOwnProperty(field)) {\r",
+							"        throw new Error(`Missing mandatory field: ${field}`);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeIdZero\", responseData.id); \r",
+							"\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"pm.test('Username is a non-empty string', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, 'Username should not be empty');\r",
+							"})\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})\r",
+							"\r",
+							"pm.collectionVariables.set(\"fname\", responseData.firstName); \r",
+							"pm.collectionVariables.set(\"lname\", responseData.lastName); \r",
+							"console.log(\"Saved fname:\", pm.collectionVariables.get(\"fname\"));\r",
+							"console.log(\"Saved lname:\", pm.collectionVariables.get(\"lname\"));"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"TestUser003\",\r\n  \"firstName\": \"{{rndNAme}}\",\r\n  \"lastName\": \"{{rndLastNAme}}\",\r\n  \"dependants\": 0,\r\n  \"expiration\": \"2026-01-01T00:00:00+00:00\",\r\n  \"salary\": 48000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetEmployeeById_ZeroDependants",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'expiration', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"Salary, gross, benefitsCost, and net must be non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData.salary).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.gross).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.benefitsCost).to.be.a('number').and.to.be.at.least(0);",
+							"    pm.expect(responseData.net).to.be.a('number').and.to.be.at.least(0);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Expiration is in a valid ISO 8601 format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.expiration).to.match(",
+							"        /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$/,",
+							"        \"Expiration date format should be ISO 8601 (e.g., 2025-10-24T04:06:56Z or with offset)\"",
+							"    );",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData.username).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});",
+							"pm.collectionVariables.set(\"fname\", responseData.firstName); ",
+							"pm.collectionVariables.set(\"lname\", responseData.lastName); ",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdZero}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdZero}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateEmployeById_ZeroDependants",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('object');",
+							"    pm.expect(responseData).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'salary', 'gross', 'benefitsCost', 'net');",
+							"});",
+							"",
+							"",
+							"pm.test(\"All numeric fields are non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    const numericFields = ['dependants', 'salary', 'gross', 'benefitsCost', 'net'];",
+							"    ",
+							"    numericFields.forEach(field => {",
+							"        pm.expect(responseData[field]).to.be.a('number').and.to.be.at.least(0, `${field} should be a non-negative integer`);",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Username is a non-empty string\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.have.property('username').that.is.a('string').and.to.have.lengthOf.at.least(1, \"Username should not be empty\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"firstName\": \"{{fname}}\",\r\n  \"lastName\": \"{{lname}}\",\r\n  \"dependants\": \"5\",\r\n  \"id\": \"{{employeeIdZero}}\"\r\n  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteEmployee",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"    console.log(\"Record deleted successfully: \" + pm.collectionVariables.get(\"employeeId\"));\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees/{{employeeIdZero}}",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees",
+						"{{employeeIdZero}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddEmployee_MissingUsername",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const payload = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"pm.test(\"Should return 400 for missing field\", function () {\r",
+							"  pm.response.to.have.status(400);\r",
+							"  pm.expect(pm.response.json().error).to.include(\"Missing required field\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeId\", response.id);\r",
+							"\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n  \"LastName\": \"DoesNotWork\", \r\n  \"firstName\": \"DoesNotWork\"  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddEmployee_MissingLastName",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const payload = JSON.parse(pm.request.body.raw);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeId\", response.id);\r",
+							"\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"firstName\": \"Nothing\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AddEmployee_MissingFirstNAme",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"pm.collectionVariables.set(\"employeeId\", response.id);\r",
+							"\r",
+							"pm.test('non-negative integers', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    [\r",
+							"        responseData.salary,\r",
+							"        responseData.gross,\r",
+							"        responseData.benefitsCost,\r",
+							"        responseData.net\r",
+							"    ].forEach(function (value) {\r",
+							"        pm.expect(value).to.be.a('number').and.to.be.at.least(0, 'Value must be a non-negative integer');\r",
+							"    });\r",
+							"})\r",
+							"\r",
+							"pm.test('Dependants is a non-negative integer', function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.dependants).to.exist.and.to.be.a('number').and.to.be.at.least(0);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{  \r\n  \"lastName\": \"Nothing\" \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAllEmployees",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response is an array with at least one employee object\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Each employee object has the required fields\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"    ",
+							"    responseData.forEach(employee => {",
+							"        pm.expect(employee).to.have.all.keys('partitionKey', 'sortKey', 'username', 'id', 'firstName', 'lastName', 'dependants', 'expiration', 'salary', 'gross', 'benefitsCost', 'net');",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Each expiration is in valid ISO 8601 format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    pm.expect(responseData).to.be.an('array');",
+							"",
+							"    const isoRegex = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(Z|[+-]\\d{2}:\\d{2})$/",
+							"",
+							"    responseData.forEach((record, index) => {",
+							"        pm.expect(record, `Record ${index} missing 'expiration' property`).to.have.property(\"expiration\");",
+							"        pm.expect(record.expiration).to.match(",
+							"            isoRegex,",
+							"            `Record ${index} has invalid expiration format: ${record.expiration}`,",
+							"        );",
+							"        ",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Numeric must be non-negative integers\", function () {",
+							"    const responseData = pm.response.json();",
+							"",
+							"    responseData.forEach((record, index) => {",
+							"        [\"salary\", \"gross\", \"benefitsCost\", \"net\"].forEach(field => {",
+							"            pm.expect(record).to.have.property(field, `Record ${index}: ${field} is missing`);",
+							"            pm.expect(record[field]).to.be.a('number', `Record ${index}: ${field} must be a number`);",
+							"            pm.expect(record[field]).to.be.at.least(0, `Record ${index}: ${field} must be ≥ 0`);",
+							"            pm.expect(Number.isInteger(record[field]), `Record ${index}: ${field} must be an integer`).to.be.true;",
+							"        });",
+							"    });",
+							"});",
+							"",
+							"pm.test(\"Validate monthly net pay based on benefits (rounded)\", function () {",
+							"    const records = pm.response.json();",
+							"    pm.expect(records).to.be.an('array');",
+							"",
+							"    const paycheckAmount = 2000;",
+							"    const annualEmployeeBenefit = 1000;",
+							"    const annualDependentBenefitPer = 500;",
+							"",
+							"    records.forEach((record, index) => {",
+							"        const dependants = record.dependants || 0;",
+							"        const totalAnnualBenefits = annualEmployeeBenefit + (dependants * annualDependentBenefitPer);",
+							"        const monthlyBenefits = +(totalAnnualBenefits / 26).toFixed(2);",
+							"        const expectedNet = +(paycheckAmount - monthlyBenefits).toFixed(2);",
+							"",
+							"        const actualGross = +(record.gross).toFixed(2);",
+							"        const actualBenefits = +(record.benefitsCost).toFixed(2);",
+							"        const actualNet = +(record.net).toFixed(2);",
+							"",
+							"        pm.expect(actualGross, `Record ${index}: Gross mismatch`).to.equal(paycheckAmount);",
+							"        pm.expect(actualBenefits, `Record ${index}: Benefits cost mismatch`).to.equal(monthlyBenefits);",
+							"        pm.expect(actualNet, `Record ${index}: Net pay mismatch`).to.equal(expectedNet);   ",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{EndPoint}}/Prod/api/employees",
+					"host": [
+						"{{EndPoint}}"
+					],
+					"path": [
+						"Prod",
+						"api",
+						"employees"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"pm.request.headers.add({ key: \"Authorization\", value: \"Basic VGVzdFVzZXI4MDk6OTIpWEovSXl9Jnsh\" });\r",
+					"pm.request.headers.add({ key: \"Content-Type\", value: \"application/json\" });\r",
+					"pm.request.headers.add({ key: \"Accept\", value: \"application/json\" });\r",
+					"\r",
+					"let rndNAme = Math.random().toString(36).substring(2, 10); // 8-char alphanumeric\r",
+					"pm.variables.set(\"rndNAme\", rndNAme);\r",
+					"\r",
+					"let rndLastNAme = Math.random().toString(36).substring(2, 10); // 8-char alphanumeric\r",
+					"pm.variables.set(\"rndLastNAme\", rndLastNAme);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					"let rndNAme = Math.random().toString(36).substring(2, 10); // 8-char alphanumeric\r",
+					"pm.variables.set(\"rndNAme\", rndNAme);\r",
+					"\r",
+					"let rndLastNAme = Math.random().toString(36).substring(2, 10); // 8-char alphanumeric\r",
+					"pm.variables.set(\"rndLastNAme\", rndLastNAme);\r",
+					"\r",
+					"pm.test(\"Status code is 200\", function () {\r",
+					"    pm.response.to.have.status(200);\r",
+					"});\r",
+					"\r",
+					"if ((pm.info.requestName !== \"DeleteEmployee\") && (pm.info.requestName !== \"GetAllEmployees\") && (pm.info.requestName !== \"DeleteEmployee\")) {\r",
+					"    // run test\r",
+					"pm.test(\"Validate monthly net pay based on benefits (rounded)\", function () {\r",
+					"    const record = pm.response.json();\r",
+					"    //pm.expect(record).to.be.an('object');\r",
+					"\r",
+					"    const paycheckAmount = 2000;\r",
+					"    const annualEmployeeBenefit = 1000;\r",
+					"    const annualDependentBenefitPer = 500;\r",
+					"\r",
+					"    const dependants = record.dependants || 0;\r",
+					"    const totalAnnualBenefits = annualEmployeeBenefit + (dependants * annualDependentBenefitPer);\r",
+					"    const monthlyBenefits = +(totalAnnualBenefits / 26).toFixed(2);\r",
+					"    const expectedNet = +(paycheckAmount - monthlyBenefits).toFixed(2);\r",
+					"\r",
+					"    const actualGross = +(record.gross).toFixed(2);\r",
+					"    const actualBenefits = +(record.benefitsCost).toFixed(2);\r",
+					"    const actualNet = +(record.net).toFixed(2);\r",
+					"\r",
+					"    pm.expect(actualGross, \"Gross mismatch\").to.equal(paycheckAmount);\r",
+					"    pm.expect(actualBenefits, \"Benefits cost mismatch\").to.equal(monthlyBenefits);\r",
+					"    pm.expect(actualNet, \"Net pay mismatch\").to.equal(expectedNet);\r",
+					"    \r",
+					"});\r",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "employeeId",
+			"value": ""
+		},
+		{
+			"key": "employeeIdMinimal",
+			"value": ""
+		},
+		{
+			"key": "fname",
+			"value": ""
+		},
+		{
+			"key": "lname",
+			"value": ""
+		},
+		{
+			"key": "employeeIdFull",
+			"value": ""
+		},
+		{
+			"key": "employeeIdZero",
+			"value": ""
+		}
+	]
+}
